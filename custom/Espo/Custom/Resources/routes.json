@@ -1,0 +1,26 @@
+[
+    {
+        "route": "/TenantManager/create",
+        "method": "post",
+        "params": {
+            "controller": "TenantManager",
+            "action": "create"
+        }
+    },
+    {
+        "route": "/TenantManager/list",
+        "method": "get",
+        "params": {
+            "controller": "TenantManager",
+            "action": "list"
+        }
+    },
+    {
+        "route": "/TenantManager/disable",
+        "method": "post",
+        "params": {
+            "controller": "TenantManager",
+            "action": "disable"
+        }
+    }
+]

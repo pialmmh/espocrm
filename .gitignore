@@ -25,6 +25,10 @@
 /custom/Espo/Modules/*
 !/custom/Espo/Custom/.htaccess
 !/custom/Espo/Modules/.htaccess
+!/custom/Espo/Custom/Controllers/
+!/custom/Espo/Custom/Controllers/**
+!/custom/Espo/Custom/Resources/
+!/custom/Espo/Custom/Resources/**
 /install/config.php
 
 client/css/espo/*
