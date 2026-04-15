@@ -140,7 +140,7 @@ img.image-preview {
 }
 
 .page-header {
-    margin: var(--15px) 0;
+    margin: var(--15px) 0 var(--16px) 0;
     border-bottom: 0;
     padding-bottom: 0;
     min-height: var(--input-height-base);
@@ -154,12 +154,13 @@ img.image-preview {
 
     .header-title,
     h3 {
-        margin-bottom: var(--7px);
+        margin-bottom: var(--4px);
         font-size: var(--22px);
-        font-weight: 400;
+        font-weight: 600;
+        color: #1f2937;
 
         a {
-            font-weight: 400;
+            font-weight: 600;
         }
     }
 
@@ -4363,4 +4364,377 @@ body > .autocomplete-suggestions.text-search-suggestions {
     --icon-line-height-base: var(--icon-line-height-small);
 
     --btn-icon-width: var(--btn-icon-width-small);
+}
+
+// =========================================================
+// SOFTSWITCH-style overrides (list pages, sidebar active, badges)
+// =========================================================
+
+// Sidebar: dark navy active state with white text/icons (broad selector)
+#navbar li.tab.active > a,
+#navbar li.tab.active > a:hover,
+#navbar li.tab.active > a:focus,
+#navbar li.active > a,
+.navbar-inverse .navbar-nav > li.active > a {
+    background-color: #1e3a5f !important;
+    color: #ffffff !important;
+
+    span, i, .fa, .fas, .far, .short-label, .full-label, .short-label-text {
+        color: #ffffff !important;
+    }
+}
+
+// Sidebar: rounded nav items with margin
+#navbar li.tab > a {
+    border-radius: var(--8px) !important;
+    margin: var(--3px) var(--10px) !important;
+}
+
+// List-page action buttons: blue Edit, red Delete
+.list-container .list-row-buttons,
+table.table .list-row-buttons {
+    .btn-link {
+        padding: var(--4px) var(--12px);
+        border-radius: var(--6px);
+        font-weight: 600;
+        font-size: var(--12px);
+        height: auto;
+
+        &[data-action="quickEdit"],
+        &[data-action="edit"],
+        &.action[data-action="edit"] {
+            background-color: #3b82f6;
+            color: #ffffff !important;
+
+            &:hover { background-color: #2563eb; }
+        }
+
+        &[data-action="quickRemove"],
+        &[data-action="remove"],
+        &.action[data-action="remove"] {
+            background-color: #ef4444;
+            color: #ffffff !important;
+
+            &:hover { background-color: #dc2626; }
+        }
+    }
+}
+
+// Status badges: rounded pills
+.label, .badge {
+    border-radius: 10px;
+    padding: 3px 10px;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+}
+
+// Primary "Create" button: more prominent (green like + Add)
+.list-buttons-container .btn-primary,
+.page-header .btn-primary {
+    background-color: #10B981;
+    border-color: #10B981;
+
+    &:hover, &:focus, &:active {
+        background-color: #059669;
+        border-color: #059669;
+    }
+}
+
+// List filter-bar inputs and button containers: airier
+.list-buttons-container {
+    margin-bottom: var(--16px);
+    padding: var(--12px) var(--16px);
+    background-color: #ffffff;
+    border-radius: var(--panel-border-radius);
+    border: 1px solid #e5e7eb;
+    box-shadow: 0px 2px 6px 0px rgba(17, 24, 39, 0.04);
+}
+
+// Record header title bigger/stronger
+.page-header .header-title,
+.page-header h3 {
+    font-size: var(--22px);
+    font-weight: 600;
+    color: #1f2937;
+}
+
+// Record main page-header row breadcrumbs
+.page-header .header-breadcrumbs {
+    font-size: var(--14px);
+    color: #6b7280;
+}
+
+// Table header: prominent uppercase
+.list-container .list table.table > thead > tr > th {
+    background-color: #f9fafb;
+    color: #6b7280;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-top: var(--14px);
+    padding-bottom: var(--14px);
+    border-bottom: 1px solid #e5e7eb;
+}
+
+// =========================================================
+// Card-style matching: entity header, colored pills, icons
+// =========================================================
+
+// Entity name in page header: bigger, bolder (like "Alma Feed Industries Ltd")
+.page-header .header-title,
+.page-header h3 {
+    font-size: var(--24px) !important;
+    font-weight: 700 !important;
+    color: #1f2937 !important;
+    letter-spacing: -0.01em;
+}
+
+.page-header .header-breadcrumbs {
+    font-size: var(--13px) !important;
+    color: #6b7280 !important;
+    font-weight: 500;
+    margin-bottom: var(--6px);
+}
+
+// Status labels as coloured pills (Postpaid, Active, New, In Process)
+.label-primary, .badge-primary {
+    background-color: #e0e7ff !important;
+    color: #4338ca !important;
+}
+.label-success, .badge-success {
+    background-color: #d1fae5 !important;
+    color: #047857 !important;
+}
+.label-warning, .badge-warning {
+    background-color: #fef3c7 !important;
+    color: #b45309 !important;
+}
+.label-danger, .badge-danger {
+    background-color: #fee2e2 !important;
+    color: #b91c1c !important;
+}
+.label-info, .badge-info {
+    background-color: #dbeafe !important;
+    color: #1e40af !important;
+}
+.label-default, .badge-default {
+    background-color: #f3f4f6 !important;
+    color: #4b5563 !important;
+}
+
+// Primary "Edit" button: dark like SOFTSWITCH (only this one)
+.record-buttons .btn-default[data-action="edit"],
+.record-buttons .actions-btn-group > .btn-default:first-child {
+    background-color: #1f2937 !important;
+    color: #ffffff !important;
+    border-color: #1f2937 !important;
+
+    &:hover, &:focus {
+        background-color: #111827 !important;
+        border-color: #111827 !important;
+        color: #ffffff !important;
+    }
+}
+
+// Secondary header buttons (Follow, Convert, arrows, etc.) — outlined
+.page-header .header-buttons .btn-default,
+.page-header .header-buttons .btn-text,
+.page-header .btn-group > .btn-default {
+    background-color: #ffffff !important;
+    color: #374151 !important;
+    border: 1px solid #d1d5db !important;
+
+    &:hover, &:focus {
+        background-color: #f9fafb !important;
+        border-color: #9ca3af !important;
+        color: #111827 !important;
+    }
+}
+
+// "Convert" (important secondary) — accented indigo
+.page-header .header-buttons [data-name="convertLead"],
+.page-header .header-buttons [data-action="convertLead"],
+.page-header .header-buttons [data-name="convert"],
+.page-header .header-buttons [data-action="convert"] {
+    background-color: #eef2ff !important;
+    color: #4338ca !important;
+    border: 1px solid #c7d2fe !important;
+
+    &:hover, &:focus {
+        background-color: #e0e7ff !important;
+        border-color: #a5b4fc !important;
+        color: #3730a3 !important;
+    }
+}
+
+// Field icons (colored circle to the left of label) for common fields
+.cell[data-name="emailAddress"] > .control-label::before,
+.cell[data-name="phoneNumber"] > .control-label::before,
+.cell[data-name="address"] > .control-label::before,
+.cell[data-name="billingAddress"] > .control-label::before,
+.cell[data-name="shippingAddress"] > .control-label::before,
+.cell[data-name="website"] > .control-label::before,
+.cell[data-name="createdAt"] > .control-label::before,
+.cell[data-name="modifiedAt"] > .control-label::before {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: #3b82f6;
+    margin-right: var(--8px);
+    font-size: var(--12px);
+    display: inline-block;
+    width: var(--16px);
+    text-align: center;
+}
+
+.cell[data-name="emailAddress"] > .control-label::before     { content: "\f0e0"; } // envelope
+.cell[data-name="phoneNumber"] > .control-label::before      { content: "\f095"; } // phone
+.cell[data-name="address"] > .control-label::before,
+.cell[data-name="billingAddress"] > .control-label::before,
+.cell[data-name="shippingAddress"] > .control-label::before  { content: "\f3c5"; } // map-marker
+.cell[data-name="website"] > .control-label::before          { content: "\f0ac"; } // globe
+.cell[data-name="createdAt"] > .control-label::before        { content: "\f073"; } // calendar
+.cell[data-name="modifiedAt"] > .control-label::before       { content: "\f073"; } // calendar
+
+// Make field values slightly more prominent
+.cell > .field {
+    font-size: var(--14px);
+    font-weight: 500;
+    color: #1f2937;
+    margin-top: var(--2px);
+}
+
+// Sidebar logo area bg (cleaner)
+#navbar .navbar-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+// List top filter buttons: primary Search blue like SOFTSWITCH
+.list-container .list-buttons-container .btn-primary,
+.list-buttons-container [data-action="search"] {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff;
+
+    &:hover, &:focus {
+        background-color: #2563eb;
+        border-color: #2563eb;
+    }
+}
+
+// =========================================================
+// Entity header strip — style .page-header like SOFTSWITCH's
+// "Alma Feed Industries Ltd" header card
+// =========================================================
+
+#main:has(.detail) .page-header,
+#main:has(.edit) .page-header {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--panel-border-radius);
+    box-shadow: 0px 2px 6px 0px rgba(17, 24, 39, 0.04);
+    padding: var(--18px) var(--22px);
+    margin-top: var(--16px);
+    margin-bottom: var(--16px);
+    min-height: auto;
+
+    // Breadcrumb row
+    .header-breadcrumbs {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+
+        // All breadcrumb items except last: small muted path
+        .breadcrumb-item:not(:last-child),
+        .breadcrumb-separator {
+            font-size: var(--12px);
+            color: #9ca3af;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        // The last breadcrumb-item = entity name. Big and bold.
+        .breadcrumb-item:last-child {
+            font-size: var(--24px);
+            font-weight: 700;
+            color: #1f2937;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+            flex-basis: 100%;
+            margin-top: var(--4px);
+        }
+
+        // Scope color icon (first breadcrumb's colored square)
+        .fas, .far, .action-icon, [class*="fa-"] {
+            font-size: var(--14px);
+        }
+    }
+
+    // Action buttons container floated right
+    .header-buttons,
+    .detail-button-container {
+        float: none;
+        margin-top: var(--8px);
+    }
+
+    // On wider screens, make breadcrumbs + buttons sit side by side
+    @media screen and (min-width: 768px) {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--16px);
+
+        .page-header-row {
+            flex: 1 1 auto;
+        }
+
+        .page-header-column-2 {
+            flex-shrink: 0;
+        }
+    }
+}
+
+// Entity icon box on the LEFT (like SOFTSWITCH's blue icon box)
+#main:has(.detail) .page-header .page-header-column-1::before,
+#main:has(.edit) .page-header .page-header-column-1::before {
+    content: "\f007";  // user icon (fallback)
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--48px);
+    height: var(--48px);
+    background-color: #2B5A8A;
+    color: #ffffff;
+    border-radius: var(--8px);
+    font-size: var(--20px);
+    float: left;
+    margin-right: var(--14px);
+}
+
+// Entity-specific icons
+
+// =========================================================
+// Global: force Inter everywhere; scale down ~10%
+// =========================================================
+
+// Ensure form controls inherit Inter (browsers don't by default)
+input, textarea, select, button,
+.form-control, .selectize-input, .selectize-dropdown-content,
+.btn, .label, .badge,
+.cell, .field, .control-label,
+.panel-title, h1, h2, h3, h4, h5, h6 {
+    font-family: Inter, sans-serif !important;
+}
+
+// Scale down: tighter overall
+body {
+    font-size: 13px;
+}
+
+.panel {
+    margin-bottom: var(--12px);
 }

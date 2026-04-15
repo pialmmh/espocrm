@@ -25,6 +25,29 @@
     font-weight: 500;
 }
 
+.btn-primary {
+    box-shadow: 0 3px 10px 0 rgba(43, 90, 138, 0.25);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+
+    &:hover {
+        box-shadow: 0 4px 14px 0 rgba(43, 90, 138, 0.35);
+    }
+}
+
+.btn-success {
+    box-shadow: 0 3px 10px 0 rgba(16, 185, 129, 0.22);
+    font-weight: 600;
+
+    &:hover {
+        box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.32);
+    }
+}
+
+.btn-danger {
+    font-weight: 600;
+}
+
 .btn-lg {
     height: var(--input-height-large);
 }
@@ -89,6 +112,23 @@ a.btn {
         background-image: none;
         box-shadow: var(--btn-active-box-shadow);
     }
+}
+
+// SOFTSWITCH-style colored glow on hover for action buttons
+.btn-primary:not(.disabled):not([disabled]):hover {
+    box-shadow: 0 8px 25px -8px var(--brand-primary);
+}
+.btn-success:not(.disabled):not([disabled]):hover {
+    box-shadow: 0 8px 25px -8px var(--brand-success);
+}
+.btn-danger:not(.disabled):not([disabled]):hover {
+    box-shadow: 0 8px 25px -8px var(--brand-danger);
+}
+.btn-warning:not(.disabled):not([disabled]):hover {
+    box-shadow: 0 8px 25px -8px var(--brand-warning);
+}
+.btn-info:not(.disabled):not([disabled]):hover {
+    box-shadow: 0 8px 25px -8px var(--brand-info);
 }
 
 .btn.disabled {

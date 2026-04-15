@@ -1,0 +1,31 @@
+// Softswitch theme — SOFTSWITCH_DASHBOARD-inspired refinements
+
+// Panels: elevated shadow (SOFTSWITCH cards use 0px 4px 25px 0px rgba(0,0,0,0.1))
+.panel {
+    box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+// Subtle depth increase on hover (SOFTSWITCH card hover behavior)
+.panel:hover {
+    box-shadow: 0 6px 28px 0 rgba(0, 0, 0, 0.11);
+}
+
+// Navbar: thin shadow to separate from body
+.navbar {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+}
+
+// Active nav item: primary-tinted background
+// Inspired by SOFTSWITCH active menu gradient
+.navbar-nav > li.active > a,
+.navbar-nav > li.active > a:hover,
+.navbar-nav > li.active > a:focus {
+    background: linear-gradient(135deg, rgba(2, 137, 247, 0.15) 0%, rgba(2, 137, 247, 0.08) 100%);
+    color: #0289f7;
+}
+
+// Dropdown shadow matches SOFTSWITCH dropdown style
+.dropdown-menu {
+    box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.10);
+}

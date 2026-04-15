@@ -1,6 +1,17 @@
 .form-control {
     border-radius: var(--border-radius);
     border: var(--input-border-width) solid var(--input-border);
+    padding-left: 14px;
+    padding-right: 14px;
+    color: var(--input-color);
+    background-color: var(--input-bg);
+    font-size: var(--font-size-base);
+
+    &:focus {
+        border-color: var(--input-border-focus);
+        box-shadow: 0 0 0 3px rgba(43, 90, 138, 0.12);
+        outline: 0;
+    }
 
     &.radius-right {
         border-top-right-radius: var(--border-radius) !important;
@@ -525,14 +536,20 @@ input[type="radio"].form-radio {
 
 
 .cell label,
-.filter label {
-    color: var(--text-muted-color);
-    font-weight: normal;
+.filter label,
+.control-label,
+.label-text,
+.cell .label-text {
+    color: #6b7280 !important;
+    font-weight: 600 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
 }
 
 .cell > label,
 .filter label {
-    margin-bottom: var(--2px);
+    margin-bottom: var(--2px) !important;
 }
 
 .cell {

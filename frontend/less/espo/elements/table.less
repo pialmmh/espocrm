@@ -71,11 +71,32 @@ th {
 
 .table thead > tr > th {
     border-bottom: var(--1px) solid @table-border-color;
-    font-weight: normal;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6b7280;
+    padding-top: var(--12px);
+    padding-bottom: var(--12px);
+    background-color: #f9fafb;
 }
 
 .table tr > th {
-    font-weight: normal;
+    font-weight: 600;
+}
+
+.table > tbody > tr {
+    transition: background-color 0.15s ease;
+
+    > td {
+        padding-top: var(--14px);
+        padding-bottom: var(--14px);
+        vertical-align: middle;
+    }
+
+    &:hover {
+        background-color: #f9fafb;
+    }
 }
 
 .table tr.accented {
