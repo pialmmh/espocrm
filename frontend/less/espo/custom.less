@@ -9,6 +9,7 @@
 @import "elements/icons.less";
 
 html {
+    zoom: 0.95;
     height: 100%;
 
     &:not(:has(> body > .container > .container-centering)):not(:has(.modal-container)) {
@@ -4384,10 +4385,12 @@ body > .autocomplete-suggestions.text-search-suggestions {
     }
 }
 
-// Sidebar: rounded nav items with margin
+// Sidebar: rounded nav items with margin, larger bold font
 #navbar li.tab > a {
     border-radius: var(--8px) !important;
     margin: var(--3px) var(--10px) !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
 }
 
 // List-page action buttons: blue Edit, red Delete
@@ -4718,7 +4721,7 @@ table.table .list-row-buttons {
 // Entity-specific icons
 
 // =========================================================
-// Global: force Inter everywhere; scale down ~10%
+// Global: force Inter everywhere; scale down ~5% (zoom 0.95)
 // =========================================================
 
 // Ensure form controls inherit Inter (browsers don't by default)
