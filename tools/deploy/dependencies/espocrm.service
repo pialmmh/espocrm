@@ -1,0 +1,20 @@
+[Unit]
+Description=EspoCRM (PHP built-in server, our multi-tenant fork)
+After=network.target mysql.service mariadb.service
+
+[Service]
+Type=simple
+User=${WWW_USER}
+Group=${WWW_GROUP}
+WorkingDirectory=${TARGET_DIR}/public
+ExecStart=/usr/bin/php -d variables_order=EGPCS -S 0.0.0.0:${SERVE_PORT} -t ${TARGET_DIR}/public
+Restart=on-failure
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+# Resource limits (tune as needed)
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target
