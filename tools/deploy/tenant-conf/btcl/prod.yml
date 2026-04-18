@@ -1,0 +1,37 @@
+# =============================================================================
+# BTCL — prod profile (real server; FILL IN before first deploy)
+# =============================================================================
+description: BTCL production
+
+# ---- SSH target ----
+ssh_host: REPLACE_ME_BTCL_PROD_HOST
+ssh_port: 22
+ssh_user: REPLACE_ME_PROD_USER
+ssh_key: ~/.ssh/id_rsa_btcl_prod
+
+# ---- Install path ----
+target_dir: /opt/espocrm
+www_user: www-data
+www_group: www-data
+
+# ---- Serve (fronted by nginx/fpm in reality; systemd unit still on serve_port) ----
+serve_port: 7080
+site_url: https://crm.btcliptelephony.gov.bd
+
+# ---- MASTER DB ----
+master_db_host: REPLACE_ME_DB_HOST
+master_db_port: 3306
+master_db_name: espocrm_master
+master_db_user: REPLACE_ME_DB_USER
+master_db_password: REPLACE_ME_DB_PASSWORD
+
+# ---- Default tenant ----
+default_tenant_slug: btcl
+default_tenant_dbname: espocrm_btcl_prod
+
+# ---- Build ----
+run_composer_install: true
+run_npm_build: false
+
+# ---- Retention ----
+keep_backups: 5

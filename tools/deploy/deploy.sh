@@ -7,106 +7,40 @@
 # "Local" = SSH to 127.0.0.1. There is no local-mode branch; all operations
 # happen over a multiplexed SSH connection.
 #
-# Source is whatever is checked out in this repo. The deploy is versioned
-# against git (creates espo-v<ts> tag if HEAD is untagged).
+# Profile: <tenant>/<profile>.yml  (e.g. btcl/staging.yml).
+# With no args, reads tenant-conf/active.conf to pick the active tenant+profile.
 #
 # Usage:
-#   ./deploy.sh <profile> [--skip-build]
-#
-# Example:
-#   ./deploy.sh local
+#   ./deploy.sh                         # use active tenant/profile
+#   ./deploy.sh <tenant> <profile>      # explicit
+#   ./deploy.sh <tenant> <profile> --skip-build
 # =============================================================================
 
 set -euo pipefail
 
-PROFILE="${1:-}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+DEP_DIR="$SCRIPT_DIR/dependencies"
+DEPLOY_DIR="$SCRIPT_DIR"
+
+# shellcheck disable=SC1091
+. "$DEP_DIR/profile-loader.sh"
+
+# Separate positional (tenant/profile) from flag args.
 SKIP_BUILD=false
-shift || true
+POSITIONAL=()
 for arg in "$@"; do
     case "$arg" in
         --skip-build) SKIP_BUILD=true ;;
-        *) echo "Unknown flag: $arg" >&2; exit 1 ;;
+        -h|--help)
+            sed -n '3,14p' "$0"; exit 0 ;;
+        *) POSITIONAL+=( "$arg" ) ;;
     esac
 done
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-CONF_DIR="$SCRIPT_DIR/tenant-conf"
-DEP_DIR="$SCRIPT_DIR/dependencies"
-
-if [ -z "$PROFILE" ]; then
-    echo "Usage: $0 <profile> [--skip-build]"
-    echo ""
-    echo "Available profiles:"
-    for f in "$CONF_DIR"/*.conf; do
-        [ -f "$f" ] && echo "  $(basename "${f%.conf}")"
-    done
-    exit 1
-fi
-
-CONFIG_FILE="$CONF_DIR/${PROFILE}.conf"
-[ -f "$CONFIG_FILE" ] || { echo "ERROR: Profile config not found: $CONFIG_FILE" >&2; exit 1; }
-
-# ----------------------------------------------------------------------------
-# INI parser (same style as routesphere)
-# ----------------------------------------------------------------------------
-parse_config() {
-    local file="$1" section="$2" key="$3"
-    awk -v section="[$section]" -v key="$key" '
-        $0 == section { in_section=1; next }
-        /^\[/         { in_section=0 }
-        in_section {
-            line = $0
-            gsub(/^[ \t]+/, "", line)
-            if (line ~ "^" key "[ \t]*=") {
-                idx = index($0, "=")
-                if (idx > 0) {
-                    value = substr($0, idx + 1)
-                    gsub(/^[ \t]+|[ \t]+$/, "", value)
-                    sub(/[ \t]+;.*$/, "", value)       # strip ; comment
-                    print value
-                }
-                exit
-            }
-        }' "$file"
-}
-g() { parse_config "$CONFIG_FILE" "$PROFILE" "$1"; }
-
-# ----------------------------------------------------------------------------
-# Load profile
-# ----------------------------------------------------------------------------
-DESCRIPTION=$(g description)
-SSH_HOST=$(g ssh_host)
-SSH_PORT=$(g ssh_port); SSH_PORT="${SSH_PORT:-22}"
-SSH_USER=$(g ssh_user)
-SSH_KEY=$(g ssh_key); SSH_KEY="${SSH_KEY/#\~/$HOME}"
-TARGET_DIR=$(g target_dir)
-WWW_USER=$(g www_user);  WWW_USER="${WWW_USER:-www-data}"
-WWW_GROUP=$(g www_group); WWW_GROUP="${WWW_GROUP:-www-data}"
-SERVE_PORT=$(g serve_port); SERVE_PORT="${SERVE_PORT:-7080}"
-SITE_URL=$(g site_url)
-
-MDB_HOST=$(g master_db_host)
-MDB_PORT=$(g master_db_port); MDB_PORT="${MDB_PORT:-3306}"
-MDB_NAME=$(g master_db_name)
-MDB_USER=$(g master_db_user)
-MDB_PASS=$(g master_db_password)
-
-DEF_SLUG=$(g default_tenant_slug);   DEF_SLUG="${DEF_SLUG:-master}"
-DEF_TDB=$(g default_tenant_dbname);  DEF_TDB="${DEF_TDB:-$MDB_NAME}"
-
-RUN_COMPOSER=$(g run_composer_install); RUN_COMPOSER="${RUN_COMPOSER:-true}"
-RUN_NPM=$(g run_npm_build);              RUN_NPM="${RUN_NPM:-false}"
-
-API_MODE=$(g admin_api_mode);           API_MODE="${API_MODE:-dedicated}"
-API_USER_NAME=$(g admin_api_user_name); API_USER_NAME="${API_USER_NAME:-admin_api}"
-MAIN_ADMIN_NAME=$(g main_admin_name);   MAIN_ADMIN_NAME="${MAIN_ADMIN_NAME:-admin}"
-KEEP_BACKUPS=$(g keep_backups);         KEEP_BACKUPS="${KEEP_BACKUPS:-3}"
-
-for v in SSH_HOST SSH_USER SSH_KEY TARGET_DIR SITE_URL MDB_HOST MDB_NAME MDB_USER; do
-    [ -z "${!v}" ] && { echo "ERROR: missing config '$v' in [$PROFILE] of $CONFIG_FILE" >&2; exit 1; }
-done
-[ -f "$SSH_KEY" ] || { echo "ERROR: SSH key not found: $SSH_KEY" >&2; exit 1; }
+resolve_profile "${POSITIONAL[@]:-}"
+load_profile_vars
+validate_profile_vars || exit 1
 
 SERVER="${SSH_USER}@${SSH_HOST}"
 
@@ -117,7 +51,7 @@ cat <<EOF
 ============================================================
   EspoCRM Deploy (SSH)
 ============================================================
-Profile:       $PROFILE${DESCRIPTION:+ — $DESCRIPTION}
+Tenant/Prof:   $TENANT / $PROFILE${DESCRIPTION:+ — $DESCRIPTION}
 Source:        $BASE_DIR
 SSH target:    ${SERVER}:${SSH_PORT}  (key: $SSH_KEY)
 Install path:  $TARGET_DIR
@@ -126,7 +60,6 @@ Serve:         systemd 'espocrm' on 0.0.0.0:${SERVE_PORT}
 Site URL:      $SITE_URL
 Master DB:     $MDB_USER@$MDB_HOST:$MDB_PORT/$MDB_NAME
 Default slug:  $DEF_SLUG  →  $DEF_TDB
-Admin API:     mode=$API_MODE  user=$( [ "$API_MODE" = "upgrade" ] && echo "$MAIN_ADMIN_NAME" || echo "$API_USER_NAME" )
 Retention:     $KEEP_BACKUPS
 Build:         composer=$RUN_COMPOSER  npm=$RUN_NPM  (skip=${SKIP_BUILD})
 ============================================================
@@ -152,7 +85,7 @@ if [ -d "$BASE_DIR/.git" ]; then
     if [ "$GIT_TAG" = "untagged" ]; then
         GIT_TAG="espo-v${TS}"
         echo "  creating tag: $GIT_TAG"
-        (cd "$BASE_DIR" && git tag -a "$GIT_TAG" -m "EspoCRM deploy $GIT_TAG (profile=$PROFILE)") || GIT_TAG="untagged"
+        (cd "$BASE_DIR" && git tag -a "$GIT_TAG" -m "EspoCRM deploy $GIT_TAG ($TENANT/$PROFILE)") || GIT_TAG="untagged"
     fi
 else
     GIT_COMMIT="unknown"; GIT_BRANCH="unknown"; GIT_TAG="untagged"
@@ -383,7 +316,7 @@ else
         echo ""
         echo ">>> $(basename "$s")"
         chmod +x "$s"
-        "$s" "$PROFILE" | tee -a "$POST_OUTPUTS_FILE"
+        "$s" "$TENANT" "$PROFILE" | tee -a "$POST_OUTPUTS_FILE"
         rc="${PIPESTATUS[0]}"
         if [ "$rc" -ne 0 ]; then
             echo "ERROR: post-install script $(basename "$s") failed (rc=$rc)" >&2
@@ -392,11 +325,11 @@ else
     done
 fi
 
-# Extract known keys emitted by post-install scripts (e.g. CRM_API_KEY) for
-# the final banner / version.txt. Absence is not fatal — a future deploy may
-# not include an API-token action.
-API_KEY=$(awk -F': +' '/^CRM_API_KEY:/ { print $2; exit }' "$POST_OUTPUTS_FILE")
-API_TARGET_USER=$( [ "$API_MODE" = "upgrade" ] && echo "$MAIN_ADMIN_NAME" || echo "$API_USER_NAME" )
+# Extract well-known KEY: value pairs from post-install outputs. Absence is
+# non-fatal — a given deploy may not include all possible actions.
+CRM_ADMIN_USER=$(awk     -F': +' '/^CRM_ADMIN_USER:/     { print $2; exit }' "$POST_OUTPUTS_FILE")
+CRM_ADMIN_PASSWORD=$(awk -F': +' '/^CRM_ADMIN_PASSWORD:/ { print $2; exit }' "$POST_OUTPUTS_FILE")
+CRM_AUTH_B64=$(awk       -F': +' '/^CRM_AUTH_B64:/       { print $2; exit }' "$POST_OUTPUTS_FILE")
 
 # Reopen SSH master for the final version.txt / history write
 ssh -o ControlMaster=yes -o ControlPath="$CTRL" -o ControlPersist=60 \
@@ -410,6 +343,7 @@ DEPLOY_TIME=$(date '+%Y-%m-%d %H:%M:%S %z')
 DEPLOYED_BY=$(whoami)
 rs "sudo tee '$TARGET_DIR/version.txt' > /dev/null <<VEOF
 project=espocrm
+tenant=$TENANT
 profile=$PROFILE
 tag=$GIT_TAG
 commit=$GIT_COMMIT
@@ -417,11 +351,11 @@ branch=$GIT_BRANCH
 master_db=$MDB_NAME
 default_tenant=${DEF_SLUG}→${DEF_TDB}
 site_url=$SITE_URL
-admin_api_user=$API_TARGET_USER
+admin_api_user=${CRM_ADMIN_USER:-}
 deployed_at=$DEPLOY_TIME
 deployed_by=$DEPLOYED_BY
 VEOF
-echo '$DEPLOY_TIME | $GIT_TAG ($GIT_COMMIT/$GIT_BRANCH) | profile=$PROFILE | admin_api=$API_TARGET_USER | by=$DEPLOYED_BY' | sudo tee -a '$TARGET_DIR/deploy-history.log' > /dev/null
+echo '$DEPLOY_TIME | $GIT_TAG ($GIT_COMMIT/$GIT_BRANCH) | $TENANT/$PROFILE | by=$DEPLOYED_BY' | sudo tee -a '$TARGET_DIR/deploy-history.log' > /dev/null
 sudo chown $WWW_USER:$WWW_GROUP '$TARGET_DIR/version.txt' '$TARGET_DIR/deploy-history.log'
 rm -rf $REMOTE_TMP"
 
@@ -439,8 +373,13 @@ Site URL:       $SITE_URL
 Master DB:      $MDB_NAME
 Default tenant: $DEF_SLUG → $DEF_TDB
 
-CRM_API_KEY for the orchestrix-v2 Spring Boot api service:
-    $API_KEY
+Credentials for the orchestrix-v2 Spring Boot api service (Basic auth —
+Espo's X-Api-Key only accepts type=api users, which fail the hard
+\$user->isAdmin() check on User/Role/Team/Settings endpoints; admin Basic
+auth is the supported path):
+    CRM_ADMIN_USER:     ${CRM_ADMIN_USER:-<not generated — run enable_api_permission.sh>}
+    CRM_ADMIN_PASSWORD: ${CRM_ADMIN_PASSWORD:-<not generated>}
+    CRM_AUTH_B64:       ${CRM_AUTH_B64:-<not generated>}
 
 New tenants: POST $SITE_URL/api/v1/TenantManager/create  (from commit fa6f571ed8)
 

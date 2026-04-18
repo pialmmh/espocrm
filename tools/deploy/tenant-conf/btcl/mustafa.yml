@@ -1,0 +1,50 @@
+# =============================================================================
+# BTCL — mustafa profile (this PC, matches orchestrix-v2 application-mustafa.yml)
+#
+# Sibling profiles on this box:
+#   btcl/dev.yml     → /opt/espocrm-btcl-dev      :7080
+#   btcl/staging.yml → /opt/espocrm-btcl-staging  :7081
+#   btcl/mustafa.yml → /opt/espocrm-btcl-mustafa  :7082   (this file)
+#
+# NOTE: port 7080 is currently occupied by the Apache-served in-place repo
+# (see /etc/apache2/sites-enabled/espocrm.conf). The `mustafa` deploy installs
+# to its own port (7082) so nothing is disturbed. To route orchestrix-v2 at
+# the deployed install, change `integrations.crm.base-url` in
+# orchestrix-v2/api/src/main/resources/application-mustafa.yml from
+# http://localhost:7080 → http://localhost:7082 and rebuild.
+# =============================================================================
+
+description: BTCL mustafa profile on localhost
+
+# ---- SSH target ----
+ssh_host: 127.0.0.1
+ssh_port: 22
+ssh_user: mustafa
+ssh_key: ~/.ssh/id_rsa
+
+# ---- Install path ----
+target_dir: /opt/espocrm-btcl-mustafa
+www_user: www-data
+www_group: www-data
+
+# ---- Built-in PHP server ----
+serve_port: 7082
+site_url: http://localhost:7082
+
+# ---- MASTER DB (control DB: tenantInfo lookup) ----
+master_db_host: 127.0.0.1
+master_db_port: 3306
+master_db_name: espocrm_master
+master_db_user: root
+master_db_password: '123456'
+
+# ---- Default tenant (inserted into master.tenantInfo) ----
+default_tenant_slug: btcl
+default_tenant_dbname: espocrm_btcl_mustafa
+
+# ---- Build steps ----
+run_composer_install: true
+run_npm_build: false
+
+# ---- Retention ----
+keep_backups: 3

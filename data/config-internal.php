@@ -4,7 +4,7 @@ return [
     'host' => 'localhost',
     'port' => '',
     'charset' => NULL,
-    'dbname' => $_SERVER['ESPO_DB_NAME'] ?? 'espocrm',
+    'dbname' => 'espocrm_acme',
     'user' => 'root',
     'password' => '123456',
     'platform' => 'Mysql'
@@ -31,7 +31,7 @@ return [
   ],
   'adminUpgradeDisabled' => false,
   'isInstalled' => true,
-  'microtimeInternal' => 1776202277.426286,
+  'microtimeInternal' => 1776372740.562894,
   'cryptKey' => '2b457b95f907d94855aceda749a45fbb',
   'hashSecretKey' => '99ee8e347707dbeb8dc779d8c9af7d60',
   'defaultPermissions' => [
@@ -40,5 +40,6 @@ return [
   ],
   'actualDatabaseType' => 'mariadb',
   'actualDatabaseVersion' => '10.11.14',
-  'instanceId' => '2a19142b-8c52-4329-9b7c-de33e0781560'
+  'instanceId' => '2a19142b-8c52-4329-9b7c-de33e0781560',
+  'apiSecretKeys' => (object) []
 ];

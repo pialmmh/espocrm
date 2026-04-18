@@ -30,15 +30,43 @@ sudo on the target (or you'll get prompted for each sudo invocation).
 tools/deploy/
 ├── deploy.sh                             ← full deploy (code + DB + service + post-install)
 ├── post_install_scripts/                 ← drop any .sh here; step 9 offers them
-│   └── api_token_creation.sh             ← admin API token (safe to re-run)
+│   └── enable_api_permission.sh          ← verify admin Basic auth, emit creds for proxy
 ├── tenant-conf/
-│   └── local.conf                         ← profile (SSH to 127.0.0.1)
+│   ├── active.conf                        ← which tenant/profile is active on this box
+│   └── <tenant>/<profile>.yml            ← one YAML per env (e.g. btcl/staging.yml)
 ├── dependencies/
+│   ├── profile-loader.sh                  ← shared YAML parser + active-profile resolver
 │   ├── ensure-master-db.sh                ← creates espocrm_master + tenantInfo + default row
-│   ├── setup-admin-api.sh                 ← MySQL helper (rotates admin api_key)
 │   └── espocrm.service                    ← systemd unit template
 └── README.md
 ```
+
+### Profile files
+
+One YAML per tenant/profile under `tenant-conf/<tenant>/<profile>.yml`.
+Shipped examples: `btcl/dev.yml`, `btcl/staging.yml`, `btcl/prod.yml`.
+Add new tenants as sibling folders.
+
+`tenant-conf/active.conf` picks the current default:
+
+```ini
+tenant=btcl
+profile=staging
+```
+
+Invocation:
+
+```bash
+./deploy.sh                            # uses active.conf
+./deploy.sh btcl staging               # explicit
+./deploy.sh btcl staging --skip-build
+./post_install_scripts/api_token_creation.sh                  # uses active.conf
+./post_install_scripts/api_token_creation.sh btcl staging     # explicit
+```
+
+YAML format: flat `key: value` only (no nesting, no arrays). Parser lives in
+`dependencies/profile-loader.sh` — keep it small; don't rely on YAML features
+beyond flat scalars + `# comments`.
 
 ### Post-install scripts convention
 
@@ -69,15 +97,31 @@ Flags:
 
 ### Re-run a single post-install script
 
-To rotate the admin API key without a full redeploy — *demo data and
-application files untouched* — run the script directly:
-
 ```bash
-./post_install_scripts/api_token_creation.sh local
+./post_install_scripts/enable_api_permission.sh              # active profile
+./post_install_scripts/enable_api_permission.sh btcl staging
+./post_install_scripts/enable_api_permission.sh btcl staging --user admin --password admin
+CRM_ADMIN_USER=admin CRM_ADMIN_PASSWORD=admin ./post_install_scripts/enable_api_permission.sh
 ```
 
-It prints `CRM_API_KEY: <hex>` at the end. This is the same script the
-deploy step-9 menu runs.
+It prompts for credentials if `--user`/`--password` and the env-var
+fallbacks are absent, verifies them against the running Espo, and prints:
+
+```
+CRM_ADMIN_USER: admin
+CRM_ADMIN_PASSWORD: ••••
+CRM_AUTH_B64:   YWRtaW46YWRtaW4=
+```
+
+### Why Basic auth, not X-Api-Key?
+
+EspoCRM's ApiKey login (`application/Espo/Core/Authentication/Helper/UserFinder.php:83-93`)
+hard-filters `type = User::TYPE_API`. An api-type user then fails the
+`$user->isAdmin()` gate on User/Role/Team/AuthToken/AuthLogRecord/
+ActionHistoryRecord/Settings controllers. Admin Basic auth is the only
+supported path that works for admin endpoints — and admin users don't get
+an `X-Api-Key` option, so `CRM_ADMIN_USER` + `CRM_ADMIN_PASSWORD` (or the
+precomputed base64 `CRM_AUTH_B64`) is what the Spring Boot proxy must send.
 
 ## What happens (9 steps)
 

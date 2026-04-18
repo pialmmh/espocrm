@@ -1,0 +1,37 @@
+# =============================================================================
+# BTCL — staging profile (this PC, production-like; ACTIVE on this machine)
+# =============================================================================
+description: BTCL staging on localhost
+
+# ---- SSH target ----
+ssh_host: 127.0.0.1
+ssh_port: 22
+ssh_user: mustafa
+ssh_key: ~/.ssh/id_rsa
+
+# ---- Install path ----
+target_dir: /opt/espocrm-btcl-staging
+www_user: www-data
+www_group: www-data
+
+# ---- Built-in PHP server ----
+serve_port: 7081
+site_url: http://localhost:7081
+
+# ---- MASTER DB ----
+master_db_host: 127.0.0.1
+master_db_port: 3306
+master_db_name: espocrm_master
+master_db_user: root
+master_db_password: '123456'
+
+# ---- Default tenant ----
+default_tenant_slug: btcl
+default_tenant_dbname: espocrm_btcl_staging
+
+# ---- Build ----
+run_composer_install: true
+run_npm_build: false
+
+# ---- Retention ----
+keep_backups: 3
