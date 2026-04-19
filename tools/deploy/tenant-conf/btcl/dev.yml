@@ -15,8 +15,8 @@ www_user: www-data
 www_group: www-data
 
 # ---- Built-in PHP server ----
-serve_port: 7080
-site_url: http://localhost:7080
+serve_port: 7082
+site_url: http://localhost:7082
 
 # ---- MASTER DB (control DB: tenantInfo lookup) ----
 master_db_host: 127.0.0.1

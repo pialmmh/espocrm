@@ -171,7 +171,6 @@ echo "[6/9] Upload & extract…"
 REMOTE_TMP="/tmp/espo-deploy-$$"
 rs "mkdir -p $REMOTE_TMP"
 rcp "$TARBALL" "${SERVER}:${REMOTE_TMP}/espocrm.tar.gz"
-rcp "$DEP_DIR/setup-admin-api.sh"   "${SERVER}:${REMOTE_TMP}/setup-admin-api.sh"
 rcp "$DEP_DIR/ensure-master-db.sh"  "${SERVER}:${REMOTE_TMP}/ensure-master-db.sh"
 rcp "$DEP_DIR/espocrm.service"      "${SERVER}:${REMOTE_TMP}/espocrm.service.tpl"
 
@@ -223,7 +222,13 @@ rs "set -e
         DUMP='$TARGET_DIR/data/fresh_dump.sql.gz'
         if [ -f \"\$DUMP\" ]; then
             echo '  tenant DB empty — importing data/fresh_dump.sql.gz'
-            gunzip -c \"\$DUMP\" | mysql -h '$MDB_HOST' -P '$MDB_PORT' -u '$MDB_USER' -p'$MDB_PASS' '$DEF_TDB'
+            # Strip TEXT/BLOB/JSON DEFAULT literals inline — MySQL 5.7 rejects them
+            # (only MySQL 8.0.13+ / MariaDB 10.2+ accept them). Safe because the
+            # dump was produced on MariaDB and TEXT columns become 'no default'.
+            gunzip -c \"\$DUMP\" \
+                | perl -pe \"s/ DEFAULT '[^']*'(,?\\\$)/\\\$1/ if /\\\\b(tinytext|text|mediumtext|longtext|tinyblob|blob|mediumblob|longblob|json)\\\\b/i\" \
+                | mysql -h '$MDB_HOST' -P '$MDB_PORT' -u '$MDB_USER' -p'$MDB_PASS' \
+                    --init-command=\"SET SESSION sql_mode='';\" '$DEF_TDB'
             echo '  fresh_dump imported'
         else
             echo '  WARNING: tenant DB empty and fresh_dump.sql.gz not present in target; you must provision schema manually.'
