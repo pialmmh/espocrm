@@ -1,10 +1,10 @@
 <?php
 return [
   'database' => [
-    'host' => 'localhost',
-    'port' => '',
+    'host' => '127.0.0.1',
+    'port' => '3306',
     'charset' => NULL,
-    'dbname' => 'espocrm_acme',
+    'dbname' => $_SERVER['ESPO_DB_NAME'] ?? 'espocrm_btcl',
     'user' => 'root',
     'password' => '123456',
     'platform' => 'Mysql'

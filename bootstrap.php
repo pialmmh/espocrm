@@ -38,7 +38,8 @@ require_once "vendor/autoload.php";
 
 (function () {
     $masterDb = [
-        'host'   => 'localhost',
+        'host'   => '127.0.0.1',
+        'port'   => 3306,
         'user'   => 'root',
         'pass'   => '123456',
         'dbname' => 'espocrm_master',
@@ -71,7 +72,7 @@ require_once "vendor/autoload.php";
     if (!$tenant) {
         try {
             $pdo  = new PDO(
-                "mysql:host={$masterDb['host']};dbname={$masterDb['dbname']};charset=utf8mb4",
+                "mysql:host={$masterDb['host']};port={$masterDb['port']};dbname={$masterDb['dbname']};charset=utf8mb4",
                 $masterDb['user'], $masterDb['pass'],
                 [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
             );
@@ -113,8 +114,15 @@ require_once "vendor/autoload.php";
     $scheme  = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $siteUrl = $scheme . '://' . $hostHeader; // includes port if present
 
-    $_SERVER['ESPO_DB_NAME']  = $tenant['dbname'];
-    $_SERVER['ESPO_SITE_URL'] = $siteUrl;
+    $_SERVER['ESPO_DB_NAME']        = $tenant['dbname'];
+    $_SERVER['ESPO_SITE_URL']       = $siteUrl;
+    $_SERVER['ESPO_TENANT_SLUG']    = $slug;
+    // Environment profile: set by deploy script at install time (defaults to
+    // 'dev'). Used by \Espo\Custom\BrandProfile to pick
+    // custom/brand-profiles/{slug}/{profile}.php.
+    if (empty($_SERVER['ESPO_TENANT_PROFILE'])) {
+        $_SERVER['ESPO_TENANT_PROFILE'] = getenv('ESPO_TENANT_PROFILE') ?: 'dev';
+    }
 })();
 
 // =============================================================================
