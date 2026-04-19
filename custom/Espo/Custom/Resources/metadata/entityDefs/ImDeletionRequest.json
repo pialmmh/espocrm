@@ -1,0 +1,66 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "chatId": {
+            "type": "varchar",
+            "maxLength": 255,
+            "required": true
+        },
+        "channel": {
+            "type": "enum",
+            "options": ["facebook", "whatsapp", "sms", "email"]
+        },
+        "requestedAt": {
+            "type": "datetime",
+            "default": "javascript: return this.dateTime.getNow();",
+            "required": true
+        },
+        "status": {
+            "type": "enum",
+            "options": ["pending", "processed", "rejected"],
+            "default": "pending",
+            "style": {
+                "pending": "warning",
+                "processed": "success",
+                "rejected": "danger"
+            },
+            "displayAsLabel": true
+        },
+        "reason": {
+            "type": "text"
+        },
+        "processedAt": {
+            "type": "datetime"
+        },
+        "processedBy": {
+            "type": "link",
+            "view": "views/fields/user"
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        }
+    },
+    "links": {
+        "processedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        }
+    },
+    "collection": {
+        "orderBy": "requestedAt",
+        "order": "desc"
+    },
+    "indexes": {
+        "status": {
+            "columns": ["status", "deleted"]
+        }
+    }
+}

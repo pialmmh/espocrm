@@ -1,0 +1,29 @@
+{
+    "fields": {
+        "chatId": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "chatChannel": {
+            "type": "enum",
+            "options": ["", "facebook", "whatsapp", "sms", "email"]
+        }
+    },
+    "links": {
+        "imConversations": {
+            "type": "hasMany",
+            "entity": "ImConversation",
+            "foreign": "relatedLead"
+        },
+        "imCustomers": {
+            "type": "hasMany",
+            "entity": "ImCustomer",
+            "foreign": "relatedLead"
+        }
+    },
+    "indexes": {
+        "chatId": {
+            "columns": ["chatId", "deleted"]
+        }
+    }
+}

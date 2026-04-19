@@ -1,0 +1,46 @@
+{
+    "fields": {
+        "xmppUser": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "xmppPass": {
+            "type": "password"
+        },
+        "pbxUuid": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "pbxDomain": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "agentUuid": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "extensionUuid": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "sipUsername": {
+            "type": "varchar",
+            "maxLength": 100
+        },
+        "sipPassword": {
+            "type": "password"
+        },
+        "dailyCallTarget": {
+            "type": "int",
+            "default": 30,
+            "min": 0
+        }
+    },
+    "links": {
+        "assignedImConversations": {
+            "type": "hasMany",
+            "entity": "ImConversation",
+            "foreign": "assignedUser"
+        }
+    }
+}

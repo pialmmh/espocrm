@@ -1,0 +1,118 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "chatId": {
+            "type": "varchar",
+            "maxLength": 255,
+            "required": true
+        },
+        "channel": {
+            "type": "enum",
+            "options": ["facebook", "whatsapp", "sms", "email"],
+            "required": true,
+            "style": {
+                "facebook": "info",
+                "whatsapp": "success",
+                "sms": "warning",
+                "email": "danger"
+            }
+        },
+        "customerName": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "customerProfilePic": {
+            "type": "url"
+        },
+        "lastMessage": {
+            "type": "text",
+            "seeMoreDisabled": true
+        },
+        "lastMessageAt": {
+            "type": "datetime"
+        },
+        "unreadCount": {
+            "type": "int",
+            "default": 0,
+            "min": 0
+        },
+        "status": {
+            "type": "enum",
+            "options": ["open", "closed", "archived"],
+            "default": "open",
+            "style": {
+                "open": "success",
+                "closed": "default",
+                "archived": "info"
+            },
+            "displayAsLabel": true
+        },
+        "assignedUser": {
+            "type": "link"
+        },
+        "relatedLead": {
+            "type": "link"
+        },
+        "relatedContact": {
+            "type": "link"
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "modifiedBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        }
+    },
+    "links": {
+        "assignedUser": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "relatedLead": {
+            "type": "belongsTo",
+            "entity": "Lead"
+        },
+        "relatedContact": {
+            "type": "belongsTo",
+            "entity": "Contact"
+        },
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        }
+    },
+    "collection": {
+        "orderBy": "lastMessageAt",
+        "order": "desc"
+    },
+    "indexes": {
+        "chatId": {
+            "columns": ["chatId", "deleted"]
+        },
+        "channel": {
+            "columns": ["channel", "deleted"]
+        },
+        "assignedUserStatus": {
+            "columns": ["assignedUserId", "status", "deleted"]
+        }
+    }
+}

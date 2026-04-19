@@ -1,0 +1,58 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "conversation": {
+            "type": "link",
+            "required": true
+        },
+        "fromUser": {
+            "type": "link"
+        },
+        "toUser": {
+            "type": "link",
+            "required": true
+        },
+        "handoffAt": {
+            "type": "datetime",
+            "default": "javascript: return this.dateTime.getNow();",
+            "required": true
+        },
+        "note": {
+            "type": "text"
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        }
+    },
+    "links": {
+        "conversation": {
+            "type": "belongsTo",
+            "entity": "ImConversation"
+        },
+        "fromUser": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "toUser": {
+            "type": "belongsTo",
+            "entity": "User"
+        }
+    },
+    "collection": {
+        "orderBy": "handoffAt",
+        "order": "desc"
+    },
+    "indexes": {
+        "conversationId": {
+            "columns": ["conversationId", "deleted"]
+        }
+    }
+}
