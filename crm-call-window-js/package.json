@@ -1,0 +1,17 @@
+{
+  "name": "crm-call-window-js",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Framework-agnostic CRM call window library (core + React/Angular/Vue wrappers).",
+  "license": "AGPL-3.0",
+  "workspaces": [
+    "packages/core",
+    "packages/react",
+    "packages/angular",
+    "packages/vue"
+  ],
+  "scripts": {
+    "build": "npm -ws run build --if-present",
+    "clean": "npm -ws run clean --if-present"
+  }
+}

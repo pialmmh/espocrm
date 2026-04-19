@@ -1,0 +1,162 @@
+<!-- Notification Permission Banner -->
+<div class="notification-banner" *ngIf="showNotificationBanner">
+  <div class="notification-banner-content">
+    <span>Enable notifications to receive incoming call alerts</span>
+  </div>
+  <div class="notification-banner-actions">
+    <button class="enable-btn" (click)="requestNotificationPermission()">Enable</button>
+    <button class="dismiss-btn" (click)="dismissNotificationBanner()">✕</button>
+  </div>
+</div>
+
+<!-- Incoming Call Modal -->
+<div class="incoming-call-overlay" *ngIf="hasIncomingCall && incomingCallData">
+  <div class="incoming-call-modal">
+    <div class="incoming-call-header">
+      <span class="incoming-label">Incoming Call</span>
+      <span class="caller-type-badge" [class.known]="isCallerKnown()" [class.unknown]="!isCallerKnown()">
+        {{ getCallerTypeLabel() }}
+      </span>
+    </div>
+    <div class="incoming-call-info">
+      <div class="incoming-avatar">
+        <img [src]="'https://ui-avatars.com/api/?name=' + getIncomingCallerName().slice(0,2) + '&background=' + (isCallerKnown() ? '00A651' : '6c757d') + '&color=fff'" alt="Caller">
+        <div class="pulse-ring"></div>
+      </div>
+      <div class="incoming-caller-name">{{ getIncomingCallerName() }}</div>
+      <div class="incoming-caller-number">{{ incomingCallData.caller.number }}</div>
+      <div class="incoming-caller-account" *ngIf="callerMatch?.record?.accountName">
+        {{ callerMatch.record.accountName }}
+      </div>
+    </div>
+    <div class="incoming-call-actions">
+      <button class="decline-btn" (click)="declineCall()">Decline</button>
+      <button class="answer-btn"  (click)="answerCall()">Answer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Transfer Dialog -->
+<div class="transfer-dialog-overlay" *ngIf="showTransferDialog" (click)="cancelTransfer()">
+  <div class="transfer-dialog" (click)="$event.stopPropagation()">
+    <h4>Transfer Call</h4>
+    <input type="text" [(ngModel)]="transferTarget" placeholder="Enter number to transfer">
+    <div class="transfer-dialog-actions">
+      <button class="cancel-btn"  (click)="cancelTransfer()">Cancel</button>
+      <button class="confirm-btn" (click)="confirmTransfer()" [disabled]="!transferTarget">Transfer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Call Toggle Button -->
+<button class="call-toggle-btn" (click)="toggleCallPanel()" *ngIf="shouldShowToggle || hasActiveCall || hasIncomingCall"
+        [class.has-active-call]="hasActiveCall"
+        [class.has-incoming]="hasIncomingCall"
+        [class.is-registered]="isRegistered"
+        [class.is-connecting]="isConnecting">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+  </svg>
+  <span class="call-badge" *ngIf="hasActiveCall">1</span>
+  <span class="call-badge incoming-badge" *ngIf="hasIncomingCall && !hasActiveCall">!</span>
+  <span class="status-dot" [class.registered]="isRegistered" [class.connecting]="isConnecting"></span>
+</button>
+
+<!-- Call Panel -->
+<div class="call-panel" *ngIf="isCallPanelOpen">
+  <div class="call-header">
+    <h3>Call Center</h3>
+    <div class="registration-status" [ngClass]="registerStatus">
+      <span class="status-indicator"></span>
+      <span class="status-text">
+        {{ registerStatus === 'registered' ? 'Online' : registerStatus === 'registering' ? 'Connecting...' : 'Offline' }}
+      </span>
+    </div>
+    <button class="minimize-btn" (click)="toggleCallPanel()">—</button>
+  </div>
+
+  <!-- DID Selection -->
+  <div class="did-selector">
+    <div class="cc-did-dropdown-wrap">
+      <button class="did-dropdown-btn" (click)="toggleDidDropdown()" [disabled]="didSettingLoading">
+        <span *ngIf="!selectedDid">Select DID</span>
+        <span *ngIf="selectedDid">{{ selectedDid }}</span>
+        <span [class.did-arrow-up]="didDropdownOpen">▾</span>
+      </button>
+      <div class="did-dropdown-list" *ngIf="didDropdownOpen">
+        <div *ngIf="didLoading" class="did-dropdown-loading">Loading...</div>
+        <div *ngIf="!didLoading && didList.length === 0" class="did-dropdown-empty">No DIDs available</div>
+        <button *ngFor="let did of didList" class="did-dropdown-item" (click)="selectDid(did)"
+                [class.did-dropdown-item-active]="selectedDid === did.number">
+          {{ did.number }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Call Display -->
+  <div class="active-call" *ngIf="hasActiveCall">
+    <div class="call-info">
+      <div class="caller-avatar"><img [src]="activeCallData.avatar" alt="Caller"></div>
+      <div class="caller-details">
+        <span class="caller-name">{{ activeCallData.name }}</span>
+        <span class="caller-number">{{ activeCallData.number }}</span>
+        <span class="call-duration">{{ callDuration }}</span>
+      </div>
+    </div>
+    <div class="call-controls">
+      <button class="control-btn" [class.active]="isMuted" (click)="toggleMute()" title="Mute">M</button>
+      <button class="control-btn" [class.active]="isOnHold" (click)="toggleHold()" title="Hold">H</button>
+      <button class="control-btn" (click)="transferCall()" title="Transfer">T</button>
+    </div>
+
+    <div class="styled-dropdowns" *ngIf="hasActiveCall">
+      <div class="dropdown-wrapper" *ngIf="hasExistingLinks()">
+        <button class="dropdown-btn" (click)="toggleLinkExisting()" [class.active]="linkExistingOpen">
+          Link Existing <span class="dropdown-arrow" [class.rotated]="linkExistingOpen">▾</span>
+        </button>
+        <div class="dropdown-panel" *ngIf="linkExistingOpen">
+          <a *ngIf="existingLeadId"        (click)="navigateToRecord('leads', existingLeadId)">Lead</a>
+          <a *ngIf="existingContactId"     (click)="navigateToRecord('contacts', existingContactId)">Contact</a>
+          <a *ngIf="existingAccountId"     (click)="navigateToRecord('accounts', existingAccountId)">Account</a>
+          <a *ngIf="existingCaseId"        (click)="navigateToRecord('cases', existingCaseId)">Case</a>
+          <a *ngIf="existingOpportunityId" (click)="navigateToRecord('opportunities', existingOpportunityId)">Opportunity</a>
+        </div>
+      </div>
+
+      <div class="dropdown-wrapper" *ngIf="hasUnlinkedModules()">
+        <button class="dropdown-btn" (click)="toggleAssociateWith()" [class.active]="associateWithOpen">
+          Associate With <span class="dropdown-arrow" [class.rotated]="associateWithOpen">▾</span>
+        </button>
+        <div class="dropdown-panel" *ngIf="associateWithOpen">
+          <a *ngIf="!existingLeadId"        (click)="navigateToCreateRecord('leads')">Lead</a>
+          <a *ngIf="!existingContactId"     (click)="navigateToCreateRecord('contacts')">Contact</a>
+          <a *ngIf="!existingAccountId"     (click)="navigateToCreateRecord('accounts')">Account</a>
+          <a *ngIf="!existingCaseId"        (click)="navigateToCreateRecord('cases')">Case</a>
+          <a *ngIf="!existingOpportunityId" (click)="navigateToCreateRecord('opportunities')">Opportunity</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DID Toast -->
+  <div class="did-toast" *ngIf="showDidToast">Please select a DID first</div>
+
+  <!-- Dialpad -->
+  <div class="tab-content">
+    <div class="phone-display">
+      <input id="cc-phone-input" type="text" [(ngModel)]="phoneNumber" placeholder="Enter number...">
+      <button class="backspace-btn" (click)="backspace()" *ngIf="phoneNumber">←</button>
+    </div>
+    <div class="dialpad">
+      <button *ngFor="let key of dialpadKeys" (click)="dialKey(key)" class="dial-key">
+        <span class="key-number">{{ key.number }}</span>
+        <span class="key-letters">{{ key.letters }}</span>
+      </button>
+    </div>
+    <div class="call-actions">
+      <button *ngIf="!hasActiveCall" class="make-call-btn" (click)="makeCall()" [disabled]="!phoneNumber || !selectedDid">Call</button>
+      <button *ngIf="hasActiveCall"  class="hangup-call-btn" (click)="endCall()">Hangup</button>
+    </div>
+  </div>
+</div>
