@@ -293,7 +293,14 @@ else
     done
     echo "    s) Skip all"
     echo ""
-    read -p "  Select: 'a' for all, 's' to skip, or numbers (e.g. '1,3'): " SEL
+    # Non-interactive run (piped stdin / CI) → auto 'a'. Also honour
+    # AUTO_POST_INSTALL=1 to force non-interactive. Interactive still prompts.
+    if [ ! -t 0 ] || [ "${AUTO_POST_INSTALL:-0}" = "1" ]; then
+        SEL="a"
+        echo "  [non-interactive] auto-selected: a (run all)"
+    else
+        read -p "  Select: 'a' for all, 's' to skip, or numbers (e.g. '1,3'): " SEL
+    fi
     SEL=$(echo "$SEL" | tr -d '[:space:]')
 
     SELECTED=()

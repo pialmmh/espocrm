@@ -60,14 +60,24 @@ done
 
 # ----------------------------------------------------------------------------
 # Resolve admin credentials — prompt if not supplied.
+# Non-interactive (piped stdin / CI / deploy.sh auto-post-install) defaults
+# to admin/admin, which is the fresh_dump baseline. Override via env or args.
 # ----------------------------------------------------------------------------
 if [ -z "$ARG_USER" ]; then
-    read -r -p "  Espo admin user [admin]: " ARG_USER
-    ARG_USER="${ARG_USER:-admin}"
+    if [ -t 0 ]; then
+        read -r -p "  Espo admin user [admin]: " ARG_USER
+        ARG_USER="${ARG_USER:-admin}"
+    else
+        ARG_USER="admin"
+    fi
 fi
 if [ -z "$ARG_PASS" ]; then
-    read -r -s -p "  Espo admin password: " ARG_PASS
-    echo
+    if [ -t 0 ]; then
+        read -r -s -p "  Espo admin password: " ARG_PASS
+        echo
+    else
+        ARG_PASS="admin"
+    fi
 fi
 [ -z "$ARG_PASS" ] && { echo "ERROR: admin password is required" >&2; exit 1; }
 
